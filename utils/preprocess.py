@@ -19,7 +19,7 @@ def clean(df):
 
     df.dropna()
 
-    required = ["radius_mean"	,"texture_mean"	,"perimeter_mean"	,"area_mean"	,"smoothness_mean"]
+    required = ["radius_mean"	,"texture_mean"	,"perimeter_mean"	,"area_mean"	,"smoothness_mean" , "concave_points_mean" , "symmetry_mean"]
     numericNum = len(required)
     df[required] = df[required].astype(float)
     df.dropna()
@@ -43,7 +43,7 @@ def scale(X, y):
     y = y.copy()
 
     global X_mean, X_std
-    global y_mean, y_std
+    # global y_mean, y_std
     global numericNum
     X_num = X[:, :numericNum]
     X_mean = X.mean(axis=0)
@@ -52,14 +52,6 @@ def scale(X, y):
     X = (
         X_num - X_mean
     ) / X_std
-    y_mean = y.mean()
-    y_std = y.std()
-    if y_std == 0:
-        y_std = 1
-
-    y = (
-        y - y_mean
-    ) / y_std
     return X, y
 
 
@@ -78,13 +70,13 @@ def scaleX(data):
     
     return scaled_data
 
-def scaleY(data):
+# def scaleY(data):
 
-    global y_mean, y_std
+#     global y_mean, y_std
 
-    return (
-        data - y_mean
-    ) / y_std
+#     return (
+#         data - y_mean
+#     ) / y_std
 
 
 
@@ -92,8 +84,6 @@ def realY(scaledPrice):
 
     global y_mean, y_std
 
-    return (
-        scaledPrice * y_std
-        +
-        y_mean
-    )
+    if(scaledPrice < 0.5):
+        return 0
+    return 1

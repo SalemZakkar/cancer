@@ -8,32 +8,34 @@ class NeuralNetwork:
         np.random.seed(42)
 
         self.W1 = (
-            np.random.randn(input_size, 32)
+            np.random.randn(input_size, 16)
             * np.sqrt(2 / input_size)
         )
-        self.b1 = np.zeros((1, 32))
+        self.b1 = np.zeros((1, 16))
 
         self.W2 = (
-            np.random.randn(32, 16)
-            * np.sqrt(2 / 32)
-        )
-        self.b2 = np.zeros((1, 16))
-
-        self.W3 = (
             np.random.randn(16, 8)
             * np.sqrt(2 / 16)
         )
-        self.b3 = np.zeros((1, 8))
+        self.b2 = np.zeros((1, 8))
+
+        self.W3 = (
+            np.random.randn(8, 4)
+            * np.sqrt(2 / 8)
+        )
+        self.b3 = np.zeros((1, 4))
 
         self.W4 = (
-            np.random.randn(8, 1)
-            * np.sqrt(2 / 8)
+            np.random.randn(4, 1)
+            * np.sqrt(2 / 4)
         )
         self.b4 = np.zeros((1, 1))
 
 
     def relu(self, x):
         return np.where(x > 0, x, 0.01 * x)
+    def sigmoid(self , x):
+        return 1 / (1 + np.exp(-x))
 
 
     def forward(self, X):
@@ -48,6 +50,8 @@ class NeuralNetwork:
         A3 = self.relu(Z3)
 
         out = A3 @ self.W4 + self.b4
+
+        out = self.sigmoid(out)
 
         return (
             Z1,

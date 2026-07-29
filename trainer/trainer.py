@@ -1,13 +1,15 @@
 import numpy as np
 
 
+def binary_cross_entropy(pred, y):
 
-def mse(pred, y):
+    eps = 1e-8
 
-    return np.mean(
-        (pred - y) ** 2
+    return -np.mean(
+        y * np.log(pred + eps)
+        +
+        (1 - y) * np.log(1 - pred + eps)
     )
-
 
 
 def leaky_relu_derivative(x):
@@ -17,7 +19,6 @@ def leaky_relu_derivative(x):
         1,
         0.01
     )
-
 
 
 def backward(
@@ -32,61 +33,67 @@ def backward(
         A3,
         pred,
 ):
+    # x -> w1 -> z1 -> a1 -> w2 -> z2 -> a2 -> w3 -> z3 -> a3 -> w4 -> out
 
     m = X.shape[0]
 
 
-    d_pred = (2 / m) * (pred - y)
-
-    # print(d_pred)
-
-    # input -> W1S -> A1S -> W2S -> A2S -> W3S -> A3S -> W4S -> A4S -> output
+    # sigmoid + BCE
+    dZ4 = pred - y
 
 
-    dW4 = A3.T @ d_pred
+    dW4 = (A3.T @ dZ4) / m
 
     db4 = np.sum(
-        d_pred,
+        dZ4,
         axis=0,
         keepdims=True
-    )
+    ) / m
 
 
 
+    dE3 = (
+        dZ4 @ model.W4.T
+    ) * leaky_relu_derivative(Z3)
 
 
-    dE3 = ((d_pred @ model.W4.T) * leaky_relu_derivative(Z3))
-    dW3 = A2.T @ dE3
+    dW3 = (A2.T @ dE3) / m
 
     db3 = np.sum(
         dE3,
         axis=0,
         keepdims=True
-    )
+    ) / m
 
 
-    dE2 = (dE3 @ model.W3.T) * leaky_relu_derivative(Z2)
 
-    dW2 = A1.T @ dE2
+    dE2 = (
+        dE3 @ model.W3.T
+    ) * leaky_relu_derivative(Z2)
+
+
+    dW2 = (A1.T @ dE2) / m
 
     db2 = np.sum(
         dE2,
         axis=0,
         keepdims=True
-    )
+    ) / m
 
 
-    dE1 = (dE2 @ model.W2.T) * leaky_relu_derivative(Z1)
 
-    dW1 = X.T @ dE1
+    dE1 = (
+        dE2 @ model.W2.T
+    ) * leaky_relu_derivative(Z1)
+
+
+    dW1 = (X.T @ dE1) / m
 
     db1 = np.sum(
         dE1,
         axis=0,
         keepdims=True
-    )
-
-    
+    ) / m
 
 
     return [
@@ -105,10 +112,6 @@ def backward(
 
 
 
-
-
-
-
 def train(
         model,
         X,
@@ -117,22 +120,17 @@ def train(
         lr=0.002
 ):
 
-
     best_loss = float("inf")
-
     best = None
-
 
 
     for epoch in range(epochs):
 
 
-        Z1,A1,Z2,A2,Z3,A3,pred = model.forward(
-            X
-        )
+        Z1,A1,Z2,A2,Z3,A3,pred = model.forward(X)
 
 
-        loss = mse(
+        loss = binary_cross_entropy(
             pred,
             y
         )
@@ -148,8 +146,9 @@ def train(
             A2,
             Z3,
             A3,
-            pred,
+            pred
         )
+
 
         model.W1 -= lr * grads[0]
         model.b1 -= lr * grads[1]
@@ -165,7 +164,6 @@ def train(
 
         model.W4 -= lr * grads[6]
         model.b4 -= lr * grads[7]
-
 
 
 
@@ -192,12 +190,11 @@ def train(
         if epoch % 100 == 0:
 
             print(
+                "epoch:",
                 epoch,
-                loss,
-                "lr:",
-                lr
+                "loss:",
+                loss
             )
-
 
 
     (
@@ -214,7 +211,6 @@ def train(
         model.b4
 
     ) = best
-
 
 
     return model

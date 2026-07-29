@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from utils.preprocess import clean , scale , scaleX ,scaleY , realY 
+from utils.preprocess import clean , scale , scaleX , realY 
 from model.neural_network import NeuralNetwork
 from trainer.trainer import train
 from diagnostics.diagnostics import report
@@ -21,7 +21,7 @@ X_train, X_test, y_train, y_test ,cdf_train, cdf_test = train_test_split(
     X,
     y,
     cdf,
-    test_size=0.01,
+    test_size=0.02,
     random_state=42
 )
 # # np.set_printoptions(
@@ -56,7 +56,7 @@ train(
     X_train,
     y_train,
     lr = 0.01,
-    epochs = 1
+    epochs = 1000
 )
 
 
