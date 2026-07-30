@@ -33,68 +33,43 @@ def backward(
         A3,
         pred,
 ):
-    # x -> w1 -> z1 -> a1 -> w2 -> z2 -> a2 -> w3 -> z3 -> a3 -> w4 -> out
+    # x -> w1 -> z1 -> a1 -> w2 -> z2 -> a2 -> w3 -> z3 -> a3 -> w4 -> sig(out)
 
     m = X.shape[0]
 
 
-    # sigmoid + BCE
-    dZ4 = pred - y
-
-
-    dW4 = (A3.T @ dZ4) / m
+    # De/dW4 = (dE/dy^) * (dy^/dZ4)  .... (y^ = sigmoid(z4 | output))
+    dZ4 = (pred - y) / m
+    # dZ4 * dZ4/dw4
+    dW4 = (A3.T @ dZ4)
 
     db4 = np.sum(
         dZ4,
         axis=0,
         keepdims=True
-    ) / m
+    )
 
-
-
-    dE3 = (
+    dZ3 = (
         dZ4 @ model.W4.T
     ) * leaky_relu_derivative(Z3)
 
+    dW3 = A2.T @ dZ3
+    db3 = np.sum(dZ3, axis=0, keepdims=True)
 
-    dW3 = (A2.T @ dE3) / m
-
-    db3 = np.sum(
-        dE3,
-        axis=0,
-        keepdims=True
-    ) / m
-
-
-
-    dE2 = (
-        dE3 @ model.W3.T
+    dZ2 = (
+    dZ3 @ model.W3.T
     ) * leaky_relu_derivative(Z2)
 
 
-    dW2 = (A1.T @ dE2) / m
+    dW2 = A1.T @ dZ2
+    db2 = np.sum(dZ2, axis=0, keepdims=True)
 
-    db2 = np.sum(
-        dE2,
-        axis=0,
-        keepdims=True
-    ) / m
-
-
-
-    dE1 = (
-        dE2 @ model.W2.T
+    dZ1 = (
+    dZ2 @ model.W2.T
     ) * leaky_relu_derivative(Z1)
 
-
-    dW1 = (X.T @ dE1) / m
-
-    db1 = np.sum(
-        dE1,
-        axis=0,
-        keepdims=True
-    ) / m
-
+    dW1 = X.T @ dZ1
+    db1 = np.sum(dZ1, axis=0, keepdims=True)
 
     return [
         dW1,
