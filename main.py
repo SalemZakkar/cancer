@@ -21,7 +21,7 @@ X_train, X_test, y_train, y_test ,cdf_train, cdf_test = train_test_split(
     X,
     y,
     cdf,
-    test_size=0.02,
+    test_size=0.01,
     random_state=42
 )
 # # np.set_printoptions(
@@ -56,7 +56,7 @@ train(
     X_train,
     y_train,
     lr = 0.01,
-    epochs = 1000
+    epochs = 20000
 )
 
 

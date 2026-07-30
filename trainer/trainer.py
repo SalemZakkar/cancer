@@ -36,12 +36,14 @@ def backward(
     # x -> w1 -> z1 -> a1 -> w2 -> z2 -> a2 -> w3 -> z3 -> a3 -> w4 -> sig(out)
 
     m = X.shape[0]
+    regularization = 0.001 / m
+
 
 
     # De/dW4 = (dE/dy^) * (dy^/dZ4)  .... (y^ = sigmoid(z4 | output))
     dZ4 = (pred - y) / m
     # dZ4 * dZ4/dw4
-    dW4 = (A3.T @ dZ4)
+    dW4 = (A3.T @ dZ4) + (regularization * model.W4)
 
     db4 = np.sum(
         dZ4,
@@ -53,7 +55,7 @@ def backward(
         dZ4 @ model.W4.T
     ) * leaky_relu_derivative(Z3)
 
-    dW3 = A2.T @ dZ3
+    dW3 = A2.T @ dZ3 + (regularization * model.W3)
     db3 = np.sum(dZ3, axis=0, keepdims=True)
 
     dZ2 = (
@@ -61,14 +63,14 @@ def backward(
     ) * leaky_relu_derivative(Z2)
 
 
-    dW2 = A1.T @ dZ2
+    dW2 = A1.T @ dZ2 + (regularization * model.W2)
     db2 = np.sum(dZ2, axis=0, keepdims=True)
 
     dZ1 = (
     dZ2 @ model.W2.T
     ) * leaky_relu_derivative(Z1)
 
-    dW1 = X.T @ dZ1
+    dW1 = X.T @ dZ1 + (regularization * model.W1)
     db1 = np.sum(dZ1, axis=0, keepdims=True)
 
     return [

@@ -80,10 +80,10 @@ def scaleX(data):
 
 
 
-def realY(scaledPrice):
+def realY(val):
 
     global y_mean, y_std
 
-    if(scaledPrice < 0.5):
+    if(val < 0.5):
         return 0
     return 1
